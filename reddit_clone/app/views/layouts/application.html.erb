@@ -10,6 +10,25 @@
   </head>
 
   <body>
+  <h1>Shmeddit</h1>
+  <% if logged_in?%>
+  <h4>Welcome, <%= current_user.username %></h4>
+  <form action="<%= session_url %>" method="post">
+    <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+    <input type="hidden" name="_method" value="delete">
+    <input type="submit" value="Sign Out">
+  </form>
+  <% else%>
+    <a href="<%= new_session_url %>">Sign In</a>
+    <a href="<%= new_user_url %>">Sign Up</a>
+  <% end%>
+
+  <% if flash[:errors] %>
+    <% flash[:errors].each do |error| %>
+      <%= error %>
+    <% end%>
+  <% end%>
+  
     <%= yield %>
   </body>
 </html>

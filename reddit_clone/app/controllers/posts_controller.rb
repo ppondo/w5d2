@@ -1,6 +1,7 @@
 class PostsController < ApplicationController
 
-  before_action :ensure_logged_in, :ensure_author
+  before_action :ensure_logged_in 
+  before_action :ensure_author, only: [:edit]
 
   def new
     @post = Post.new
@@ -10,11 +11,16 @@ class PostsController < ApplicationController
   def create
     @post = Post.new(post_params)
     @post.user_id = current_user.id
+    
+
     if @post.save
-      redirect_to sub_url(@post.sub)
+      params[:post][:sub_ids].each do |sub_id|
+        PostSub.create!(post_id: @post.id, sub_id: sub_id)
+      end
+      redirect_to post_url(@post)
     else
-    flash.now[:errors] = @post.errors.full_messages
-    render :new
+      flash.now[:errors] = @post.errors.full_messages
+      render :new
     end
   end
 
@@ -30,6 +36,7 @@ class PostsController < ApplicationController
     else 
       flash.now[:errors] = @post.errors.full_messages
       render :edit
+    end
   end
 
   def show
@@ -44,10 +51,11 @@ class PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(:sub_id, :title, :url, :content)
+    params.require(:post).permit(:title, :url, :content, :sub_ids)
   end
 
   def ensure_author
-    @post.author.id == current_user.id
+    @post = Post.find(params[:id])
+    redirect_to subs_url unless @post.author.id == current_user.id
   end
 end

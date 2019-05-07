@@ -1,6 +1,7 @@
 class SubsController < ApplicationController
 
-  before_action :ensure_logged_in, :ensure_moderator
+  before_action :ensure_logged_in
+  before_action :ensure_moderator, only: [:edit] 
 
   def new
     @sub = Sub.new
@@ -48,7 +49,8 @@ class SubsController < ApplicationController
   end
 
   private
-  def ensure_moderator
-    @sub.moderator.id == current_user.id
+  def ensure_moderator 
+    @sub = Sub.find(params[:id])
+    redirect_to subs_url unless @sub.moderator.id == current_user.id
   end
 end
